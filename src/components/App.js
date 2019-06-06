@@ -60,26 +60,43 @@ class App extends Component {
 
   setOperation(operation) {
     console.log('operation:', operation);
+
+    const firstNumber = parseFloat(this.state.display);
+    if(this.operators.length === 1 && this.state.operation) {
+      this.doComputation(true);
+    }
+    else {
+      this.operators.push(firstNumber);
+    }
     // salvo operatore
     this.setState({ operation });
-    // salvo primo operando
-    const firstNumber = this.state.display;
-    // aggiungo primo operando
-    this.operators.push(parseFloat(firstNumber));
     // reset del this.digits
     this.digits = [];
-
     console.log('this.operators', this.operators, 'this.digits', this.digits);
+
+    
   }
 
-  doComputation() {
-    const secondNumber = this.state.display;
-    this.operators.push(parseFloat(secondNumber));
+  doComputation(setTotal=false) {
+    //Non eseguire computazione se non ho i due operandi
+    if(this.operators.length !== 2 && !this.state.operation) return false;
 
+    const secondNumber = this.operators === 1 ? this.operators[0]:this.state.display;    
+    this.operators.push(parseFloat(secondNumber));
     console.log(this.operators);
 
-    let result = '';
+    const total = this.getResult();
 
+    this.operators = [];
+    if(setTotal) this.operators.push(total);
+    this.digits = [];
+
+    this.setState({ display: total, operation: '' });    
+    console.log(this.operators);
+  }
+
+  getResult() {
+    let result = 0;
     switch (this.state.operation) {
       case PLUS:
         result = sum(this.operators);
@@ -94,15 +111,10 @@ class App extends Component {
         result = divide(this.operators[0], this.operators[1]);
         break;
     }
-
-    this.operators = [];
-    this.digits = [];
-    this.setState({ display: parseFloat(result), operation: '' });
+    return parseFloat(parseFloat(result).toPrecision(12));
   }
 
   handleClick(label) {
-    // Gestore del click
-    // console.log('label:', label);
 
     switch (label) {
       case PLUS:
